@@ -1,0 +1,825 @@
+[
+    {
+        "id": "b9026e5d79db632a",
+        "type": "tab",
+        "label": "Challenge 3",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a05c609ee1a2718f",
+        "type": "inject",
+        "z": "b9026e5d79db632a",
+        "name": "AUTO: Load CSV on deploy",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 60,
+        "wires": [
+            [
+                "bac9f88565f77287"
+            ]
+        ]
+    },
+    {
+        "id": "8a878fadd4778c95",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Parse CSV and store by Packet Number",
+        "func": "// msg.payload is the full CSV file content read by the File In node.\nfunction parseCsvLine(line) {\n    var cols = [];\n    var inQ = false;\n    var cur = '';\n    for (var i = 0; i < line.length; i++) {\n        var ch = line[i];\n        if (ch === '\"') {\n            // Handle escaped double quote \"\" inside a quoted field\n            if (inQ && line[i + 1] === '\"') {\n                cur += '\"';\n                i++;\n            } else {\n                inQ = !inQ;\n            }\n        } else if (ch === ',' && !inQ) {\n            cols.push(cur);\n            cur = '';\n        } else {\n            cur += ch;\n        }\n    }\n    cols.push(cur);\n    return cols;\n}\n\ntry {\n    var content = String(msg.payload || '');\n    var lines = content.split(/\\r?\\n/);\n    if (lines.length < 2) {\n        throw new Error('CSV file is empty or missing data rows');\n    }\n\n    var headers = parseCsvLine(lines[0]);\n    var data = {};\n\n    for (var i = 1; i < lines.length; i++) {\n        var line = lines[i];\n        if (!line || !line.trim()) continue;\n        var cols = parseCsvLine(line);\n        var row = {};\n        for (var j = 0; j < headers.length; j++) {\n            row[headers[j]] = (cols[j] !== undefined) ? cols[j] : '';\n        }\n        var pn = parseInt(row['Packet Number']);\n        if (!isNaN(pn)) data[pn] = row;\n    }\n\n    flow.set('csvData', data);\n    node.status({fill:'green', shape:'dot', text:'Loaded ' + Object.keys(data).length + ' packets'});\n} catch(e) {\n    node.error('CSV load failed: ' + e.message);\n    node.status({fill:'red', shape:'ring', text:'Load failed'});\n}\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1020,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "44615b870c21654d",
+        "type": "inject",
+        "z": "b9026e5d79db632a",
+        "name": "AUTO: Write id_log.csv header",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 170,
+        "y": 120,
+        "wires": [
+            [
+                "7161e8a47cf263b9"
+            ]
+        ]
+    },
+    {
+        "id": "7161e8a47cf263b9",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "id_log header payload",
+        "func": "\n\nflow.set('id_counter', 0);\nflow.set('received_count', 0);\nflow.set('stop_generation', false);\nflow.set('outgoing_cost_rows', []);   \nflow.set('outgoing_cost_idx', {});   \nmsg.payload  = 'No.,ID,TIMESTAMP\\n';\nmsg.filename = './challenge3_output/id_log.csv';\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 120,
+        "wires": [
+            [
+                "5e0724ed507d5e3b"
+            ]
+        ]
+    },
+    {
+        "id": "5e0724ed507d5e3b",
+        "type": "file",
+        "z": "b9026e5d79db632a",
+        "name": "OVERWRITE id_log.csv (header only)",
+        "filename": "./challenge3_output/id_log.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 1010,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "caea43d95f3d7afd",
+        "type": "inject",
+        "z": "b9026e5d79db632a",
+        "name": "AUTO: Write filtered_elems.csv header",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 180,
+        "wires": [
+            [
+                "e3597307cdb6a665"
+            ]
+        ]
+    },
+    {
+        "id": "e3597307cdb6a665",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "filtered_elems header payload",
+        "func": "flow.set('filtered_counter', 0);\nmsg.payload  = 'No.,Timestamp,Sequence Number,Attribute,Status,Data Type,Data Value\\n';\nmsg.filename = './challenge3_output/filtered_elems.csv';\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 570,
+        "y": 180,
+        "wires": [
+            [
+                "c5445e98eda0acdd"
+            ]
+        ]
+    },
+    {
+        "id": "c5445e98eda0acdd",
+        "type": "file",
+        "z": "b9026e5d79db632a",
+        "name": "OVERWRITE filtered_elems.csv (header only)",
+        "filename": "./challenge3_output/filtered_elems.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 1040,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0877124a1acd1762",
+        "type": "inject",
+        "z": "b9026e5d79db632a",
+        "name": "Every 1 second",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 580,
+        "wires": [
+            [
+                "6c3d83156ae020d2"
+            ]
+        ]
+    },
+    {
+        "id": "6c3d83156ae020d2",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Generate random ID + timestamp",
+        "func": "if (flow.get('stop_generation') === true) {\n    node.status({fill:'red', shape:'ring', text:'Stopped after 200 received messages'});\n    return null;\n} //if the flow is stoped, color red and print stopped\n\nvar id = Math.floor(Math.random() * 30001); //we generate a random number between 0 and 30k -->floor(..) elps to round down the int\nvar ts  = Math.floor(Date.now() / 1000); //creates the current time UNIX in s\nmsg.payload = JSON.stringify({id: id, timestamp: ts}); //here we create the content of the MQTT msg\nmsg._id = id;\nmsg._ts = ts;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 580,
+        "wires": [
+            [
+                "fabb56a4a7db6189",
+                "6e24384656f4553e"
+            ]
+        ]
+    },
+    {
+        "id": "fabb56a4a7db6189",
+        "type": "mqtt out",
+        "z": "b9026e5d79db632a",
+        "name": "Publish challenge3/id_generator",
+        "topic": "challenge3/id_generator",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "mqtt_broker_local",
+        "x": 770,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "6e24384656f4553e",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Append row to id_log.csv",
+        "func": "//here the node add a new row to id_log.csv each time that a new id is generated\nvar counter = flow.get('id_counter') || 0; //I need id_counter to remember how many rows I have already written\ncounter++;\nflow.set('id_counter', counter);\nmsg.payload  = counter + ',' + msg._id + ',' + msg._ts + '\\n'; //what to write\nmsg.filename = './challenge3_output/id_log.csv' ; //here I tell the node where to write the info\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 750,
+        "y": 620,
+        "wires": [
+            [
+                "8bcd24fded0558b2"
+            ]
+        ]
+    },
+    {
+        "id": "8bcd24fded0558b2",
+        "type": "file",
+        "z": "b9026e5d79db632a",
+        "name": "APPEND to id_log.csv",
+        "filename": "./challenge3_output/id_log.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 1060,
+        "y": 620,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4eea77f175880127",
+        "type": "mqtt in",
+        "z": "b9026e5d79db632a",
+        "name": "Subscribe challenge3/id_generator",
+        "topic": "challenge3/id_generator",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "mqtt_broker_local",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 840,
+        "wires": [
+            [
+                "3fde221589144212"
+            ]
+        ]
+    },
+    {
+        "id": "3fde221589144212",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Count messages (stop at 200)",
+        "func": "\nif (flow.get('stop_generation') === true) {\n    return [null, null];\n}\n\nvar count = flow.get('received_count') || 0;\ncount++;\nflow.set('received_count', count);\nnode.status({fill:'blue', shape:'dot', text: count + ' / 200'});\n\nif (count > 200) {\n    flow.set('stop_generation', true);\n    node.status({fill:'red', shape:'dot', text:'STOPPED - 200 reached'});\n    return [null, null];\n}\n\nvar isLast = (count === 200);\n\n// Branch finalize will start always on the 200th, indipendently from parse of the payload\nvar finalizeMsg = isLast ? {payload: 'finalize_after_200'} : null;\nif (isLast) {\n    flow.set('stop_generation', true);\n}\n\nvar data;\ntry {\n    data = (typeof msg.payload === 'string') ? JSON.parse(msg.payload) : msg.payload;\n} catch(e) {\n    node.warn('Invalid JSON received on challenge3/id_generator: ' + e.message);\n    return [null, finalizeMsg];\n}\n\nmsg._sub_id    = Number(data.id);\nmsg._sub_ts    = data.timestamp;\nmsg._msg_count = count;\nmsg._is_last   = isLast;\n\nreturn [msg, finalizeMsg];\n",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 920,
+        "wires": [
+            [
+                "bce592d1d7e9dd0f"
+            ],
+            [
+                "0612400ed25dc8c0"
+            ]
+        ]
+    },
+    {
+        "id": "bce592d1d7e9dd0f",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Compute N ",
+        "func": "msg._N = msg._sub_id % 5218;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 880,
+        "wires": [
+            [
+                "3c5af8ad41207730"
+            ]
+        ]
+    },
+    {
+        "id": "3c5af8ad41207730",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Lookup packet N in CSV",
+        "func": "//i will search through packets\nvar csvData = flow.get('csvData');\nif (!csvData) {\n    node.error('csvData not loaded.');\n    return null;\n}\nvar row = csvData[msg._N];\nif (!row) {\n    node.warn('Packet ' + msg._N + ' not found');\n    return null;\n}\nmsg._row = row;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 880,
+        "wires": [
+            [
+                "1e29d592d9dd5ff5"
+            ]
+        ]
+    },
+    {
+        "id": "1e29d592d9dd5ff5",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Classify: ZBEE_ZCL / Link Status / Ignore",
+        "func": "var cs      = msg._row['Command String'] || '';\nvar pktType = msg._row['Packet Type']    || '';\nif (cs.indexOf('Layer ZBEE_ZCL') !== -1) {\n    msg._type = 'zbee_zcl';\n} else if (pktType.indexOf('Link Status') !== -1) {\n    msg._type = 'link_status';\n} else {\n    msg._type = 'ignore';\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1220,
+        "y": 880,
+        "wires": [
+            [
+                "937be528cef9d4f3"
+            ]
+        ]
+    },
+    {
+        "id": "937be528cef9d4f3",
+        "type": "switch",
+        "z": "b9026e5d79db632a",
+        "name": "Route by packet type",
+        "property": "_type",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "zbee_zcl",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "link_status",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 1520,
+        "y": 880,
+        "wires": [
+            [
+                "ba4bdf86d6d0c082"
+            ],
+            [
+                "208b6a67d7d05d94"
+            ]
+        ]
+    },
+    {
+        "id": "ba4bdf86d6d0c082",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Build ZigBee MQTT payload",
+        "func": "var row = msg._row;\nvar cs  = row['Command String'];\nvar ts  = Math.floor(Date.now() / 1000);\n\nvar topicName = 'ZigBee/' + row['Device Name ZigBee Source'];\n\nvar payload = {\n    timestamp:    ts,\n    id:           msg._sub_id,\n    'wpan.src':   row['Source Address'],\n    'wpan.dst':   row['Destination Address'],\n    'zbee.src':   row['Source Address ZigBee'],\n    'zbee.dst':   row['Destination Address ZigBee'],\n    topic:        topicName,\n    payload:      cs\n};\n\n// The MQTT out node has an empty topic, so it uses this dynamic msg.topic.\nmsg.topic   = topicName;\nmsg.payload = JSON.stringify(payload);\nmsg._pub_ts = ts;\n\n// Parse Command String (Python dict literals -> JSON)\ntry {\n    var jsStr = cs.replace(/'/g, '\"')\n                  .replace(/\\bTrue\\b/g,  'true')\n                  .replace(/\\bFalse\\b/g, 'false')\n                  .replace(/\\bNone\\b/g,  'null');\n    msg._cmd = JSON.parse(jsStr);\n} catch(e) {\n    msg._cmd = {};\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1800,
+        "y": 740,
+        "wires": [
+            [
+                "046e10cdf53189a4"
+            ]
+        ]
+    },
+    {
+        "id": "046e10cdf53189a4",
+        "type": "delay",
+        "z": "b9026e5d79db632a",
+        "name": "Rate limit: 10 msg / minute",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "10",
+        "nbRateUnits": "1",
+        "rateUnits": "minute",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 2080,
+        "y": 740,
+        "wires": [
+            [
+                "2555ec4bcfed6845",
+                "45167248a375ec48"
+            ]
+        ]
+    },
+    {
+        "id": "2555ec4bcfed6845",
+        "type": "mqtt out",
+        "z": "b9026e5d79db632a",
+        "name": "Publish ZigBee message",
+        "topic": "",
+        "qos": "0",
+        "retain": "",
+        "broker": "mqtt_broker_local",
+        "x": 2390,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "45167248a375ec48",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Check RMS Current + Voltage + Active Power",
+        "func": "// Replaces: func_check_power_attrs\n// we drop packets that don't have the status\nvar cmd = msg._cmd || {};\nvar ts  = msg._pub_ts || Math.floor(Date.now() / 1000);\n\nvar attrs     = cmd['Attribute'] || [];\nif (typeof attrs     === 'string') attrs     = [attrs];\n\nvar statuses  = cmd['Status']    || [];\nif (typeof statuses  === 'string') statuses  = [statuses];\n\nvar dataTypes = cmd['Data Type'] || [];\nif (typeof dataTypes === 'string') dataTypes = [dataTypes];\n\nvar seq = (cmd['Sequence Number'] !== undefined) ? cmd['Sequence Number'] : '';\n\n// HARD FILTER: only Read Attributes Response has all the camps (Attribute, Status, Data Type, Value).\n//drop Read Attributes (0x00), Report Attributes (0x0a), Default Response (0x0b).\nif (attrs.length === 0 || statuses.length === 0 || dataTypes.length === 0) {\n    return [null, null, null];\n}\n\nvar typeFields = ['Int16', 'Uint16'];\nvar typeLists  = {};\nfor (var f = 0; f < typeFields.length; f++) {\n    var tf = typeFields[f];\n    if (cmd[tf] !== undefined) {\n        typeLists[tf] = Array.isArray(cmd[tf]) ? cmd[tf] : [cmd[tf]];\n    }\n}\nvar typeCounters = {};\n\nfunction fieldForDtype(dtypeStr) {\n    var dl = dtypeStr.toLowerCase();\n    if (dl.indexOf('16-bit signed')   !== -1) return 'Int16';\n    if (dl.indexOf('16-bit unsigned') !== -1) return 'Uint16';\n    return null;\n}\n\nfunction getVal(dtypeStr) {\n    var field = fieldForDtype(dtypeStr);\n    if (!field || !typeLists[field]) return {ok: false};\n    var idx = typeCounters[field] || 0;\n    typeCounters[field] = idx + 1;\n    var raw = typeLists[field][idx];\n    if (raw === undefined) return {ok: false};\n    return {ok: true, val: String(raw).split(' (')[0]};\n}\n\nvar targetKws = ['RMS Current', 'RMS Voltage', 'Active Power'];\nvar powerRows = [];\n\nfor (var i = 0; i < attrs.length; i++) {\n    var attr  = attrs[i];\n    var dtype = dataTypes[i];\n    var status = statuses[i];\n\n    // counter for position-matching\n    var v = (dtype !== undefined) ? getVal(dtype) : {ok: false};\n\n    // Per-attribute completeness check\n    if (status === undefined || dtype === undefined || !v.ok) {\n        continue;\n    }\n\n    var isTarget = false;\n    for (var t = 0; t < targetKws.length; t++) {\n        if (attr.indexOf(targetKws[t]) !== -1) { isTarget = true; break; }\n    }\n    if (!isTarget) continue;\n\n    powerRows.push({\n        ts:     ts,\n        seq:    seq,\n        attr:   attr.split(' (')[0],\n        status: status.split(' (')[0],\n        dtype:  dtype.split(' (')[0],\n        val:    v.val\n    });\n}\n\nif (powerRows.length === 0) {\n    return [null, null, null];\n}\n\nvar voltMsg = null, currMsg = null;\nfor (var r = 0; r < powerRows.length; r++) {\n    var pr = powerRows[r];\n    if (pr.attr === 'RMS Voltage') {\n        voltMsg = {payload: parseFloat(pr.val) || 0, topic: 'RMS Voltage'};\n    } else if (pr.attr === 'RMS Current') {\n        currMsg = {payload: parseFloat(pr.val) || 0, topic: 'RMS Current'};\n    }\n}\n\nreturn [{payload: powerRows}, voltMsg, currMsg];\n",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2460,
+        "y": 720,
+        "wires": [
+            [
+                "8242063543964715"
+            ],
+            [
+                "7fd2d0722202ee04"
+            ],
+            [
+                "b7680662c3fd2f33"
+            ]
+        ]
+    },
+    {
+        "id": "8242063543964715",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Append rows to filtered_elems.csv",
+        "func": "var rows    = msg.payload;\nvar counter = flow.get('filtered_counter') || 0;\nvar lines   = '';\n\nfunction csvSafe(x) {\n    if (x === undefined || x === null) return '';\n    var s = String(x);\n    if (s.indexOf(',') !== -1 || s.indexOf('\\n') !== -1 || s.indexOf('\\\"') !== -1) {\n        s = '\"' + s.replace(/\"/g, '\"\"') + '\"';\n    }\n    return s;\n}\n\nfor (var r = 0; r < rows.length; r++) {\n    var pr = rows[r];\n    counter++;\n    lines += counter + ',' +\n             pr.ts + ',' +\n             csvSafe(pr.seq) + ',' +\n             csvSafe(pr.attr) + ',' +\n             csvSafe(pr.status) + ',' +\n             csvSafe(pr.dtype) + ',' +\n             csvSafe(pr.val) + '\\n';\n}\nflow.set('filtered_counter', counter);\nmsg.payload  = lines;\nmsg.filename = './challenge3_output/filtered_elems.csv';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2600,
+        "y": 580,
+        "wires": [
+            [
+                "7a2fc3b78d0b851d"
+            ]
+        ]
+    },
+    {
+        "id": "7a2fc3b78d0b851d",
+        "type": "file",
+        "z": "b9026e5d79db632a",
+        "name": "APPEND to filtered_elems.csv",
+        "filename": "./challenge3_output/filtered_elems.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 2750,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7fd2d0722202ee04",
+        "type": "ui_chart",
+        "z": "b9026e5d79db632a",
+        "name": "RMS Voltage Chart",
+        "group": "ui_group_charts",
+        "order": 1,
+        "width": 6,
+        "height": 4,
+        "label": "RMS Voltage",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "No data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "useOneColor": false,
+        "colors": [
+            "#1f77b4"
+        ],
+        "outputs": 1,
+        "className": "",
+        "x": 2770,
+        "y": 760,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b7680662c3fd2f33",
+        "type": "ui_chart",
+        "z": "b9026e5d79db632a",
+        "name": "RMS Current Chart",
+        "group": "ui_group_charts",
+        "order": 2,
+        "width": 6,
+        "height": 4,
+        "label": "RMS Current",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "No data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": "",
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#ff7f0e",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 2750,
+        "y": 820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "208b6a67d7d05d94",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Process Link Status – update cost map",
+        "func": "\n// it preserves the order of arrival\n// \n// Strategy-> we use an ARRAY of rows to preserve the order of arrivals \n// each row is : {src, dst, cost}. when we recieve a link that wants to update an existing link\n//we leave the number untouched and simply update the cost\n\nvar row = msg._row;\nvar cs  = row['Command String'];\nvar src = String(row['Source Address ZigBee'] || '').trim().toLowerCase();\n\ntry {\n    var jsStr = cs.replace(/'/g, '\"')\n                  .replace(/\\bTrue\\b/g,  'true')\n                  .replace(/\\bFalse\\b/g, 'false')\n                  .replace(/\\bNone\\b/g,  'null');\n    var cmd = JSON.parse(jsStr);\n\n    // Array of rows { src, dst, cost }\n    var costRows = flow.get('outgoing_cost_rows') || [];\n\n    // Index for lookup veloce: \"src|dst\" -> indice nella array\n    var idx = flow.get('outgoing_cost_idx') || {};\n\n    var links = cmd['Links'] || [];\n    if (!Array.isArray(links)) links = [links];\n\n    for (var i = 0; i < links.length; i++) {\n        var dst = String(links[i]['Address'] || '').trim().toLowerCase();\n        var cost = Number(links[i]['Outgoing Cost']);\n        if (!dst || isNaN(cost)) continue;\n\n        var key = src + '|' + dst;\n        if (idx[key] !== undefined) {\n            // update only the cost, position preserved\n            costRows[idx[key]].cost = cost;\n        } else {\n            costRows.push({ src: src, dst: dst, cost: cost });\n            idx[key] = costRows.length - 1;\n        }\n    }\n\n    flow.set('outgoing_cost_rows', costRows);\n    flow.set('outgoing_cost_idx',  idx);\n} catch(e) {\n    node.warn('Link Status parse error: ' + e.message);\n}\nreturn null;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1810,
+        "y": 920,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0612400ed25dc8c0",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Save outgoing_cost.csv & build ThingSpeak sequence",
+        "func": "\n// we order only for ThingSpeak.\n\nvar costRows = flow.get('outgoing_cost_rows') || [];\n\nfunction hexVal(x) {\n    return parseInt(String(x).trim(), 16);\n}\n\n// CSV written based on the arrival order (no reordering)\nvar lines = 'No.,Source,Destination,Cost\\n';\nfor (var i = 0; i < costRows.length; i++) {\n    var r = costRows[i];\n    lines += (i + 1) + ',' + r.src + ',' + r.dst + ',' + r.cost + '\\n';\n}\n\nvar csvMsg = {\n    payload: lines,\n    filename: './challenge3_output/outgoing_cost.csv'\n};\nnode.status({fill:'green', shape:'dot', text:'outgoing_cost.csv ready (' + costRows.length + ' rows)'});\n\n// for ThingSpeak: smallest source + dest ascending hex \nif (costRows.length === 0) {\n    node.warn('No link status data collected. outgoing_cost.csv has only the header.');\n    return [csvMsg, null];\n}\n\n// find the smallest source (treat as hex)\nvar sourcesSeen = {};\nfor (var s = 0; s < costRows.length; s++) {\n    sourcesSeen[costRows[s].src] = true;\n}\nvar srcList = Object.keys(sourcesSeen);\nsrcList.sort(function(a, b) { return hexVal(a) - hexVal(b); });\nvar smallestSrc = srcList[0];\n\n// all the rows of the smallestSrc ordered for dest hex ascending\nvar rowsForSmallest = costRows.filter(function(r) { return r.src === smallestSrc; });\nrowsForSmallest.sort(function(a, b) { return hexVal(a.dst) - hexVal(b.dst); });\n\nvar sequence = [];\nfor (var j = 0; j < rowsForSmallest.length; j++) {\n    sequence.push({ dst: rowsForSmallest[j].dst, cost: rowsForSmallest[j].cost });\n}\n\nvar tsMsg = {payload: sequence, _smallest_src: smallestSrc};\nreturn [csvMsg, tsMsg];\n",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 1040,
+        "wires": [
+            [
+                "40dca7afce7d69cf"
+            ],
+            [
+                "e0d3d4fad1610218"
+            ]
+        ]
+    },
+    {
+        "id": "e0d3d4fad1610218",
+        "type": "function",
+        "z": "b9026e5d79db632a",
+        "name": "Split into individual ThingSpeak msg",
+        "func": "// Each item in the sequence becomes its own msg\n// The delay node downstream passes exactly 1 message every 20 seconds\nvar sequence = msg.payload;\n\nfor (var i = 0; i < sequence.length; i++) {\n    var item = sequence[i];\n    node.send({\n        payload: item.cost,\n        _dst: item.dst,\n        url: 'https://api.thingspeak.com/update?api_key=YOUR_THINGSPEAK_WRITE_API_KEY&field1=' + item.cost //used my personal API write key \n    });\n}\n\nreturn null;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1010,
+        "y": 1100,
+        "wires": [
+            [
+                "ab754e257010f38e"
+            ]
+        ]
+    },
+    {
+        "id": "ab754e257010f38e",
+        "type": "delay",
+        "z": "b9026e5d79db632a",
+        "name": "Rate limit: 1 msg / 20 seconds",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "20",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1350,
+        "y": 1100,
+        "wires": [
+            [
+                "7ff9f5a30f9464b2"
+            ]
+        ]
+    },
+    {
+        "id": "7ff9f5a30f9464b2",
+        "type": "http request",
+        "z": "b9026e5d79db632a",
+        "name": "GET ThingSpeak update",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1630,
+        "y": 1100,
+        "wires": [
+            [
+                "a7b438046b417d72"
+            ]
+        ]
+    },
+    {
+        "id": "a7b438046b417d72",
+        "type": "debug",
+        "z": "b9026e5d79db632a",
+        "name": "ThingSpeak response",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1900,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "bac9f88565f77287",
+        "type": "file in",
+        "z": "b9026e5d79db632a",
+        "name": "Read challenge3.csv",
+        "filename": "./challenge3.csv",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": true,
+        "encoding": "none",
+        "allProps": false,
+        "x": 540,
+        "y": 60,
+        "wires": [
+            [
+                "8a878fadd4778c95"
+            ]
+        ]
+    },
+    {
+        "id": "40dca7afce7d69cf",
+        "type": "file",
+        "z": "b9026e5d79db632a",
+        "name": "OVERWRITE outgoing_cost.csv",
+        "filename": "./challenge3_output/outgoing_cost.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 1010,
+        "y": 980,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "mqtt_broker_local",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto 1884",
+        "broker": "localhost",
+        "port": "1884",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "ui_group_charts",
+        "type": "ui_group",
+        "name": "Power Measurements",
+        "tab": "ui_tab_challenge3",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "ui_tab_challenge3",
+        "type": "ui_tab",
+        "name": "Challenge 3",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "1f05faf69bf7c9d4",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-dashboard": "3.6.6"
+        }
+    }
+]

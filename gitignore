@@ -1,0 +1,14 @@
+# Node-RED runtime stuff (in case she accidentally drops this in)
+.node-red/
+flows_cred.json
+*.backup
+.config.*.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
