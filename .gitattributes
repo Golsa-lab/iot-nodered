@@ -1,0 +1,10 @@
+# The flow export is the source of truth, but it is data, not code: the logic
+# that GitHub should count lives in src/functions/ (extracted from this file).
+flows.json      linguist-language=JSON linguist-detectable=false
+docs/data/*.csv linguist-detectable=false
+
+src/functions/*.js linguist-language=JavaScript
+*.js  text eol=lf
+*.csv text eol=lf
+*.pdf binary
+*.png binary
