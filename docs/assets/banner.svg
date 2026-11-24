@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.6" stop-color="#FBF6F7"/><stop offset="1" stop-color="#F3E3E7"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#000" stroke-opacity="0.035"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8C1C3A"/></marker>
+    <style>.n{fill:#FFFFFF;stroke:#8C1C3A;stroke-width:1.5}.t{font-family:Helvetica,Arial,sans-serif;font-size:13px;fill:#1A1A1D;text-anchor:middle}.m{font-family:Menlo,Consolas,monospace;font-size:10.5px;fill:#8C1C3A;text-anchor:middle}.w{fill:none;stroke:#8C1C3A;stroke-width:1.5}</style>
+  </defs>
+  <rect width="1200" height="320" rx="18" fill="url(#bg)" stroke="#EAD0D6" stroke-width="2"/>
+  <rect width="1200" height="320" rx="18" fill="url(#grid)"/>
+  <g transform="translate(655,92) scale(0.92)">
+    <rect class="n" x="0" y="0" width="110" height="56" rx="28"/><text class="t" x="55" y="26">ZigBee</text><text class="m" x="55" y="42">5218 packets</text>
+    <path class="w" d="M110 28H148" marker-end="url(#a)"/>
+    <rect x="150" y="0" width="120" height="56" rx="10" fill="#5E1224"/><text class="t" x="210" y="26" style="fill:#FFFFFF">MQTT</text><text class="m" x="210" y="42" style="fill:#F3E3E7">:1884 · QoS 0</text>
+    <path class="w" d="M270 28H308" marker-end="url(#a)"/>
+    <rect class="n" x="310" y="0" width="110" height="56" rx="10"/><text class="t" x="365" y="26">Node-RED</text><text class="m" x="365" y="42">15 functions</text>
+    <path class="w" d="M420 28H458" marker-end="url(#a)" />
+    <rect class="n" x="460" y="0" width="90" height="56" rx="28"/><text class="t" x="505" y="26">Thing</text><text class="m" x="505" y="42">Speak</text>
+    <!-- message counter -->
+    <g transform="translate(0,96)">
+      <text x="0" y="0" font-family="Menlo, Consolas, monospace" font-size="11" fill="#1A1A1D" fill-opacity=".55">messages</text>
+      <g fill="#8C1C3A">
+        <rect x="0" y="12" width="4" height="22"/><rect x="8" y="12" width="4" height="22"/><rect x="16" y="12" width="4" height="22"/><rect x="24" y="12" width="4" height="22"/><rect x="32" y="12" width="4" height="22"/><rect x="40" y="12" width="4" height="22"/><rect x="48" y="12" width="4" height="22"/><rect x="56" y="12" width="4" height="22"/><rect x="64" y="12" width="4" height="22"/><rect x="72" y="12" width="4" height="22"/>
+      </g>
+      <rect x="84" y="12" width="370" height="22" fill="#8C1C3A" fill-opacity=".18"/>
+      <line x1="460" y1="6" x2="460" y2="40" stroke="#1A1A1D" stroke-width="2"/>
+      <text x="468" y="28" font-family="Menlo, Consolas, monospace" font-size="12" fill="#1A1A1D">200 → stop</text>
+    </g>
+  </g>
+  <g font-family="Georgia, 'Times New Roman', serif">
+    <text x="60" y="118" font-size="38" fill="#1A1A1D">ZigBee → MQTT → ThingSpeak</text>
+    <text x="62" y="160" font-size="22" font-style="italic" fill="#8C1C3A">one Node-RED flow, 200 messages, then silence</text>
+  </g>
+  <rect x="62" y="190" width="64" height="3" fill="#8C1C3A"/>
+  <text x="62" y="228" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#1A1A1D" fill-opacity=".6" letter-spacing="1.4">NODE-RED · MOSQUITTO · ZIGBEE ZCL · THINGSPEAK · LORAWAN</text>
+  <text x="62" y="256" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#1A1A1D" fill-opacity=".6" letter-spacing="1.4">IOT CHALLENGE #3 · POLITECNICO DI MILANO</text>
+</svg>

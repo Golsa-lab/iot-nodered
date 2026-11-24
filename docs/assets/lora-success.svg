@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="380" viewBox="0 0 1000 380">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FBF6F7"/></linearGradient></defs>
+<rect width="1000" height="380" rx="16" fill="url(#bg)" stroke="#EAD0D6" stroke-width="2"/>
+<text x="30" y="34" font-family="Helvetica, Arial, sans-serif" font-size="11" letter-spacing="2" fill="#1A1A1D" fill-opacity=".5">PURE ALOHA · 40 NODES · λ = 2 PKT/MIN · 20-BYTE PAYLOAD · BW 125 kHz</text>
+<line x1="90" y1="300.0" x2="950" y2="300.0" stroke="#1A1A1D" stroke-opacity=".08"/>
+<text x="78" y="304.0" text-anchor="end" font-family="Menlo, Consolas, monospace" font-size="11" fill="#1A1A1D" fill-opacity=".6">0%</text>
+<line x1="90" y1="240.0" x2="950" y2="240.0" stroke="#1A1A1D" stroke-opacity=".08"/>
+<text x="78" y="244.0" text-anchor="end" font-family="Menlo, Consolas, monospace" font-size="11" fill="#1A1A1D" fill-opacity=".6">25%</text>
+<line x1="90" y1="180.0" x2="950" y2="180.0" stroke="#1A1A1D" stroke-opacity=".08"/>
+<text x="78" y="184.0" text-anchor="end" font-family="Menlo, Consolas, monospace" font-size="11" fill="#1A1A1D" fill-opacity=".6">50%</text>
+<line x1="90" y1="120.0" x2="950" y2="120.0" stroke="#1A1A1D" stroke-opacity=".08"/>
+<text x="78" y="124.0" text-anchor="end" font-family="Menlo, Consolas, monospace" font-size="11" fill="#1A1A1D" fill-opacity=".6">75%</text>
+<line x1="90" y1="60.0" x2="950" y2="60.0" stroke="#1A1A1D" stroke-opacity=".08"/>
+<text x="78" y="64.0" text-anchor="end" font-family="Menlo, Consolas, monospace" font-size="11" fill="#1A1A1D" fill-opacity=".6">100%</text>
+<rect x="121.5" y="101.9" width="80.3" height="198.1" rx="4" fill="#5E1224"/>
+<text x="161.7" y="93.9" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="12" fill="#5E1224">82.5%</text>
+<text x="161.7" y="322" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1A1A1D">SF7</text>
+<text x="161.7" y="340" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10.5" fill="#1A1A1D" fill-opacity=".55">71.9 ms</text>
+<rect x="264.9" y="131.9" width="80.3" height="168.1" rx="4" fill="#E7C7CF"/>
+<text x="305.0" y="151.9" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="12" fill="#1A1A1D">70.0%</text>
+<text x="305.0" y="322" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1A1A1D">SF8</text>
+<text x="305.0" y="340" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10.5" fill="#1A1A1D" fill-opacity=".55">133.6 ms</text>
+<rect x="408.2" y="175.7" width="80.3" height="124.3" rx="4" fill="#E7C7CF"/>
+<text x="448.3" y="167.7" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="12" fill="#1A1A1D">51.8%</text>
+<text x="448.3" y="322" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1A1A1D">SF9</text>
+<text x="448.3" y="340" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10.5" fill="#1A1A1D" fill-opacity=".55">246.8 ms</text>
+<rect x="551.5" y="228.2" width="80.3" height="71.8" rx="4" fill="#E7C7CF"/>
+<text x="591.7" y="220.2" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="12" fill="#1A1A1D">29.9%</text>
+<text x="591.7" y="322" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1A1A1D">SF10</text>
+<text x="591.7" y="340" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10.5" fill="#1A1A1D" fill-opacity=".55">452.6 ms</text>
+<rect x="694.9" y="282.7" width="80.3" height="17.3" rx="4" fill="#E7C7CF"/>
+<text x="735.0" y="274.7" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="12" fill="#1A1A1D">7.2%</text>
+<text x="735.0" y="322" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1A1A1D">SF11</text>
+<text x="735.0" y="340" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10.5" fill="#1A1A1D" fill-opacity=".55">987.1 ms</text>
+<rect x="838.2" y="298.1" width="80.3" height="1.9" rx="4" fill="#E7C7CF"/>
+<text x="878.3" y="290.1" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="12" fill="#1A1A1D">0.8%</text>
+<text x="878.3" y="322" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#1A1A1D">SF12</text>
+<text x="878.3" y="340" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="10.5" fill="#1A1A1D" fill-opacity=".55">1810.4 ms</text>
+<line x1="90" y1="120.0" x2="950" y2="120.0" stroke="#8C1C3A" stroke-width="1.6" stroke-dasharray="6 5"/>
+<text x="950" y="112.0" text-anchor="end" font-family="Georgia, serif" font-style="italic" font-size="13" fill="#8C1C3A">target ≥ 75 %  ⇒  T_air ≤ 107.9 ms</text>
+</svg>
